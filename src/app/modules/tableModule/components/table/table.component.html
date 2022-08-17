@@ -23,26 +23,40 @@
     </mat-select>
   </mat-form-field>
 
-  <section class="example-section">
-  <span class="example-list-section">
-        <span class="example-list-section">{{task.name}}</span>
-  </span>
-    <span class="example-list-section">
-    <ul>
-      <li *ngFor="let subtask of task.subtasks">
-        <mat-checkbox [(ngModel)]="subtask.completed"
-                      [color]="subtask.color"
-                      (ngModelChange)="updateAllComplete()">
-          {{subtask.name}}
-        </mat-checkbox>
-      </li>
-    </ul>
-  </span>
-  </section>
+<!--  <section class="example-section">-->
+<!--  <span class="example-list-section">-->
+<!--        <span class="example-list-section">{{task.name}}</span>-->
+<!--  </span>-->
+<!--    <span class="example-list-section">-->
+<!--    <ul>-->
+<!--      <li *ngFor="let subtask of task.subtasks">-->
+<!--        <mat-checkbox [(ngModel)]="subtask.completed"-->
+<!--                      [color]="subtask.color"-->
+<!--                      (ngModelChange)="updateAllComplete()">-->
+<!--          {{subtask.name}}-->
+<!--        </mat-checkbox>-->
+<!--      </li>-->
+<!--    </ul>-->
+<!--  </span>-->
+<!--  </section>-->
+  <div class="select"
+       [sub]="filterByRating.subtask"
+       (onFilter)="onFilter($event)"
+       [title]="'Рейтинг'"
+       [valueSelect]="filterByRating.filterMethod"
+  >
+  </div>
+  <div class="select"
+       [sub]="filterBySold.subtask"
+       (onFilter)="onFilter($event)"
+       [title]="'Продано'"
+       [valueSelect]="filterBySold.filterMethod"
+  >
+  </div>
 </div>
 
 <div class="table__container">
-  <ng-container *ngFor="let item of $tableItems | async">
+  <ng-container *ngFor="let item of filtredSortedData ">
     <div class="item" [item]="item"></div>
   </ng-container>
 </div>

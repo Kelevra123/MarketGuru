@@ -1,10 +1,9 @@
 import { AfterViewInit, Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { TableService } from "../../table.service";
-import { Observable } from "rxjs";
-import { map, tap } from "rxjs/operators";
-import { IItem } from "../../types";
+import { tap } from "rxjs/operators";
+import { IItem, SelectEmit, SelectOptions } from "../../types";
 import { MatPaginator } from "@angular/material/paginator";
-import { TableEnum } from "../../table.enum";
+import { FilterMethod, TableEnum } from "../../table.enum";
 import { ViewportScroller } from "@angular/common";
 
 @Component({
@@ -17,52 +16,50 @@ export class TableComponent implements OnInit, AfterViewInit {
   @ViewChild(MatPaginator)
   public paginator: MatPaginator | null = null;
 
-  public $allItems: Observable<IItem[]> = new Observable<any>();
-  public $tableItems: Observable<IItem[]> = new Observable<any>();
-  public $sortedItems: Observable<IItem[]> = new Observable<any>();
+  public data: Array<IItem> = [];
+  public originalData: Array<IItem> = [];
+  public sortedData: Array<IItem> = [];
+  public originalSortedData: Array<IItem> = [];
+  public filtredSortedData: Array<IItem> = [];
+
   public limit: number = 6;
   public size: number = 0;
   public actualPage: number = 0;
-  public isFilter: boolean = false;
+  public filterEmit: any = {};
 
-  allComplete: boolean = false;
-
-  task: any = {
-    name: 'Rating',
-    completed: false,
-    color: 'primary',
-    subtasks: [
+  public filterByRating: SelectOptions = {
+    filterMethod : FilterMethod.BY_RATING,
+    subtask: [
       {name: '5', completed: false, color: 'warn', todo: 5},
       {name: '4', completed: false, color: 'warn', todo: 4},
-      {name: '3', completed: false, color: 'warn', todo: 3},
-    ],
+      {name: '3', completed: false, color: 'warn', todo: 3}
+    ]
   };
+
+  public filterBySold: SelectOptions = {
+    filterMethod: FilterMethod.BY_SOLD,
+    subtask: [
+      {name: 'Больше 10000', completed: false, color: 'warn', todo: 10000},
+      {name: 'Больше 30000', completed: false, color: 'warn', todo: 30000},
+      {name: 'Больше 50000', completed: false, color: 'warn', todo: 50000}
+    ]
+  };
+
 
   constructor(
     private readonly _tableService: TableService,
-    private viewPortScroller : ViewportScroller
+    private _viewPortScroller : ViewportScroller
   ) { }
 
   ngOnInit(): void {
-    this.$allItems = this.$tableItems = this._tableService.fetch().pipe(
-      map(data => {
-        return data.map((item: IItem, index) => (
-          {
-            ...item,
-            image: `https://picsum.photos/200/300?random=${index + 3}`,
-            preview: `https://picsum.photos/200/300?random=${index + 3}`,
-          }
-        ))
-      }),
-      map(data => {
-        this.size = data.length;
-        return data;
-      } )
-    )
-    this.$tableItems = this.$allItems.pipe(
-      map(data => data.slice(0, this.limit))
-    )
-    this.$sortedItems = this.$allItems;
+    this._tableService.fetch().subscribe(data => {
+      this.data = [...data];
+      this.originalData = [...data];
+      this.sortedData = [...this.data];
+      this.filtredSortedData = [...this.data.slice(0, this.limit)];
+      this.originalSortedData = [...this.sortedData];
+      this.size = data.length;
+    })
   }
 
   ngAfterViewInit(): void {
@@ -70,80 +67,91 @@ export class TableComponent implements OnInit, AfterViewInit {
       .pipe(
         tap(() => this.paginatorHandler())
       )
-      .subscribe()
+      .subscribe();
   }
 
   private paginatorHandler(force: boolean = false) {
-    this.$tableItems = this.$sortedItems.pipe(
-      map(data => {
-        if (this.paginator && typeof this.paginator.pageIndex === "number" && typeof this.paginator.pageSize === "number") {
-          if (!force) {
-            this.actualPage = this.paginator.pageIndex
-          }
-          return data.slice(this.actualPage * this.paginator.pageSize, (this.actualPage + 1)* this.paginator.pageSize);
-        }
+    if (this.paginator && typeof this.paginator.pageIndex === "number" && typeof this.paginator.pageSize === "number") {
+      if (!force) {
+        this.actualPage = this.paginator.pageIndex;
+      }
+      this.filtredSortedData = [...this.sortedData.slice(this.actualPage * this.paginator.pageSize, (this.actualPage + 1)* this.paginator.pageSize)];
+    }
 
 
-        return data;
-      })
-    )
     if (!force) {
-      this.viewPortScroller.scrollToPosition([0, 0])
+      this._viewPortScroller.scrollToPosition([0, 0]);
     }
 
   }
 
   public handleFilter(e: any) {
     if (e.value != TableEnum.NO_FILTER) {
-      this.isFilter = true;
 
       if (e.value === TableEnum.ALPHABET) {
-        this.$sortedItems = this.$sortedItems.pipe(
-          map(data => data.sort((a, b) => a.name > b.name ? 1 : -1)),
-        )
+        this.sortedData = [...this.sortedData.sort((a: IItem, b: IItem) => a.name > b.name ? 1 : -1)];
+        this.originalSortedData = [...this.data.sort((a: IItem, b: IItem) => a.name > b.name ? 1 : -1)];
       }
       else if (e.value === TableEnum.RATING) {
-        this.$sortedItems = this.$sortedItems.pipe(
-          map(data => data.sort(function (a, b) {
-            return b.wbRating - a.wbRating
-          }))
-        )
+        this.sortedData = [...this.sortedData.sort(function (a: IItem, b: IItem) {
+          return b.wbRating - a.wbRating;
+        })];
+        this.originalSortedData = [...this.data.sort(function (a: IItem, b: IItem) {
+          return b.wbRating - a.wbRating;
+        })];
       }
       else if (e.value === TableEnum.REVIEWS_COUNT) {
-        this.$sortedItems = this.$sortedItems.pipe(
-          map(data => data.sort(function (a, b) {
-            return b.reviewsCount - a.reviewsCount
-          }))
-        )
+        this.sortedData = [...this.sortedData.sort(function (a: IItem, b: IItem) {
+          return b.reviewsCount - a.reviewsCount;
+        })];
+        this.originalSortedData = [...this.data.sort(function (a: IItem, b: IItem) {
+          return b.reviewsCount - a.reviewsCount;
+        })];
       }
     }
     else {
-      this.$sortedItems = this.$allItems
+      this.sortedData = [...this.originalData];
+      this.originalSortedData = [...this.originalData];
     }
 
     this.paginatorHandler()
   }
 
-  public updateAllComplete() {
-    this.allComplete = this.task.subtasks != null && this.task.subtasks.every((t: any) => t.completed);
+  private filter = (filterObj: any) => {
+    let filtredArr = [...this.originalSortedData];
 
-    this.$sortedItems = this.$sortedItems.pipe(
-      map(data => {
-        const filterValue = this.task.subtasks
-          .filter((t: any) => t.completed)
-          .map((t: any) => t.todo)
-        if (filterValue.length) {
-          data = data.filter(item => filterValue.includes(item.wbRating))
-        } else {
-            data = data
+    for (let key in filterObj) {
+      if (key === FilterMethod.BY_RATING) {
+        const arr: any[] = filterObj[key];
+        if (arr.length) {
+          filtredArr = [...filtredArr.filter((i: IItem) => arr.includes(i[key as keyof IItem]))];
         }
-        this.size = data.length;
-        this.actualPage = 0;
-        return data
-      })
-    )
+        else {
+            this.sortedData = [...filtredArr];
+        }
+      }
+      if (key === FilterMethod.BY_SOLD) {
+        const arr: any[] = filterObj[key];
+        if (arr.length) {
+          filtredArr = [...filtredArr.filter((i: IItem) => i[key as keyof IItem] > Math.min(...arr))];
+        }
+        else {
+          this.sortedData = [...filtredArr];
+        }
+      }
+    }
 
-    this.paginator?.firstPage()
-    this.paginatorHandler(true)
+    this.sortedData = [...filtredArr];
+  }
+
+  public onFilter($event: SelectEmit) {
+    if ($event) {
+      this.filterEmit[$event.field] = $event.arr;
+      this.filter(this.filterEmit);
+
+      this.size = this.sortedData.length;
+      this.paginator?.firstPage();
+      this.paginatorHandler(true);
+    }
   }
 }

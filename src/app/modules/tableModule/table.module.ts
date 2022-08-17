@@ -10,13 +10,15 @@ import { MatPaginatorModule } from "@angular/material/paginator";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatCheckboxModule } from "@angular/material/checkbox";
 import { FormsModule } from "@angular/forms";
+import { SelectComponent } from './components/UI/select/select.component';
 
 
 
 @NgModule({
   declarations: [
     TableComponent,
-    ItemComponent
+    ItemComponent,
+    SelectComponent
   ],
   imports: [
     CommonModule,
@@ -30,8 +32,7 @@ import { FormsModule } from "@angular/forms";
   ],
   providers: [TableService],
   exports: [
-    TableComponent,
-    ItemComponent
+    TableComponent
   ]
 })
 export class TableModule { }
