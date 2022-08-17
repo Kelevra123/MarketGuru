@@ -1,0 +1,49 @@
+.table{
+
+  &__wrapper {
+    margin: 5em 0;
+    width: 100%;
+    display: flex;
+
+    @media (width < 1200px) {
+      flex-direction: column;
+    }
+  }
+
+  &__filter {
+    width: 16%;
+    padding: 0 15px;
+    background: steelblue;
+    display: flex;
+    flex-direction: column;
+
+
+    @media (width < 1200px) {
+      width: 90%;
+      margin: auto;
+      padding: 1em;
+    }
+  }
+
+  &__container {
+    width: 84%;
+    margin: auto;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+
+
+    @media (width < 1200px) {
+      width: 100%;
+    }
+  }
+}
+
+.moc__container {
+  width: 80%;
+  margin: auto;
+}
+
+.moc {
+  text-align: center;
+}

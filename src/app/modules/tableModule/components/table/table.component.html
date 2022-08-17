@@ -1,0 +1,58 @@
+<div class="moc__container">
+  <h1 class="moc">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab, rem.</h1>
+  <p class="moc">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Assumenda doloremque explicabo laudantium maiores repudiandae vel?</p>
+</div>
+
+<div class="table__wrapper">
+<div class="table__filter">
+  <mat-form-field appearance="fill">
+    <mat-label>Упорядочить по</mat-label>
+    <mat-select (selectionChange)="handleFilter($event)">
+      <mat-option [value]="1">
+        алфавиту
+      </mat-option>
+      <mat-option [value]="2">
+        рейтингу
+      </mat-option>
+      <mat-option [value]="3">
+        количеству отзывов
+      </mat-option>
+      <mat-option [value]="0">
+        убрать фильтры
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <section class="example-section">
+  <span class="example-list-section">
+        <span class="example-list-section">{{task.name}}</span>
+  </span>
+    <span class="example-list-section">
+    <ul>
+      <li *ngFor="let subtask of task.subtasks">
+        <mat-checkbox [(ngModel)]="subtask.completed"
+                      [color]="subtask.color"
+                      (ngModelChange)="updateAllComplete()">
+          {{subtask.name}}
+        </mat-checkbox>
+      </li>
+    </ul>
+  </span>
+  </section>
+</div>
+
+<div class="table__container">
+  <ng-container *ngFor="let item of $tableItems | async">
+    <div class="item" [item]="item"></div>
+  </ng-container>
+</div>
+
+</div>
+
+<mat-paginator
+  [pageSize]="limit"
+  [length]="size"
+  [pageSizeOptions]="[6, 12, 24]"
+               aria-label="Select page">
+</mat-paginator>
+

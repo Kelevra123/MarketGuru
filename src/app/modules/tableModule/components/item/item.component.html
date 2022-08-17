@@ -1,0 +1,10 @@
+<div class="item__container">
+  <h1 class="item__title">{{item?.name}}</h1>
+  <h3 class="item__brand">Brand: {{item?.brandName}}</h3>
+  <img class="item__preview" src={{item?.preview}} alt=""/>
+  <h3>Rating: {{item?.wbRating}}</h3>
+  <ng-container *ngFor="let i of [].constructor(item?.wbRating)">
+    <fa-icon class="item__star" [icon]="faStar"></fa-icon>
+  </ng-container>
+  <h3>In stock: {{item?.availability}}</h3>
+</div>
