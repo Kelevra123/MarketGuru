@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { TableService } from "../../table.service";
 import { tap } from "rxjs/operators";
 import { IItem, SelectEmit, SelectOptions } from "../../types";
@@ -12,7 +12,7 @@ import { ViewportScroller } from "@angular/common";
   styleUrls: ['./table.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class TableComponent implements OnInit, AfterViewInit {
+export class TableComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(MatPaginator)
   public paginator: MatPaginator | null = null;
 
@@ -68,6 +68,10 @@ export class TableComponent implements OnInit, AfterViewInit {
         tap(() => this.paginatorHandler())
       )
       .subscribe();
+  }
+
+  ngOnDestroy(): void {
+    this.paginator?.page.unsubscribe()
   }
 
   private paginatorHandler(force: boolean = false) {
